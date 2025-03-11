@@ -1,45 +1,52 @@
 package excel.tools;
 
+/**
+ * Utilitaire pour convertir entre les références Excel et les indices
+ */
 public class ExcelConverter {
+    /**
+     * Convertit les indices de ligne et colonne en référence Excel (ex: A1, B2)
+     */
+    public static String rowColToExcel(int row, int column) {
+        return columnIndexToLetter(column) + (row + 1);
+    }
+
+    /**
+     * Convertit un indice de colonne en lettre (0->A, 1->B, etc.)
+     */
+    public static String columnIndexToLetter(int columnIndex) {
+        StringBuilder result = new StringBuilder();
+
+        do {
+            result.insert(0, (char) ('A' + columnIndex % 26));
+            columnIndex = columnIndex / 26 - 1;
+        } while (columnIndex >= 0);
+
+        return result.toString();
+    }
+
+    /**
+     * Convertit une référence Excel en indices de ligne et colonne
+     */
     public static int[] excelToRowCol(String reference) {
-        if (!reference.matches("[A-Z]+[0-9]+")) {
-            throw new IllegalArgumentException("Format invalide. Attendu: lettres suivies de chiffres");
+        if (reference == null || reference.isEmpty()) {
+            return new int[] {0, 0};
         }
 
+        // Séparer les lettres des chiffres
         String letters = reference.replaceAll("[0-9]", "");
-        String numbers = reference.replaceAll("[A-Z]", "");
+        String numbers = reference.replaceAll("[A-Za-z]", "");
 
-        int col = 0;
+        // Convertir les lettres en indice de colonne
+        int column = 0;
         for (int i = 0; i < letters.length(); i++) {
-            col = col * 26 + (letters.charAt(i) - 'A' + 1);
+            column = column * 26 + (Character.toUpperCase(letters.charAt(i)) - 'A' + 1);
         }
-        col--; // Ajustement pour que A=0
+        column--; // Ajuster pour l'indice 0
 
-        int row = Integer.parseInt(numbers) - 1;
-        return new int[]{row, col};
-    }
+        // Convertir les chiffres en indice de ligne
+        int row = Integer.parseInt(numbers) - 1; // Ajuster pour l'indice 0
 
-    public static String rowColToExcel(int row, int col) {
-        StringBuilder colStr = new StringBuilder();
-        col++; // Ajustement pour que 0=A
-
-        while (col > 0) {
-            col--;
-            colStr.insert(0, (char)('A' + (col % 26)));
-            col = col / 26;
-        }
-
-        return colStr.toString() + (row + 1);
-    }
-
-    public static void main(String[] args) {
-        String[] tests = {"B15", "AB1", "AA1"};
-
-        for (String test : tests) {
-            int[] coords = excelToRowCol(test);
-            System.out.println(test + " -> ligne=" + coords[0] + ", colonne=" + coords[1]);
-            System.out.println("Retour: " + rowColToExcel(coords[0], coords[1]));
-        }
+        return new int[] {row, column};
     }
 }
-

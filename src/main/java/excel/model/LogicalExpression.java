@@ -38,7 +38,7 @@ public class LogicalExpression implements Expression {
     }
 
     @Override
-    public CellValue evaluate(SpreadsheetModel spreadsheet) {
+    public CellValue evaluate(SpreadsheetModel spreadsheet)throws CircularReferenceException {
         CellValue leftValue = left.evaluate(spreadsheet);
 
         // Vérifier si l'opérande gauche est une erreur
