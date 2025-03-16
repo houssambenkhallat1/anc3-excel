@@ -54,6 +54,7 @@ public class LogicalExpression implements Expression {
         // Pour les opérateurs binaires, évaluer l'opérande droite
         CellValue rightValue = right.evaluate(spreadsheet);
         if (rightValue.isError()) return rightValue;
+        if (!rightValue.isBoolean()) return CellValue.ofError(CellError.SYNTAX_ERROR);
 
         boolean rightBool = toBooleanValue(rightValue);
 

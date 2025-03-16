@@ -65,7 +65,7 @@ public class SpreadsheetModel {
     public void notifyCellChanged(Cell cell) {
         List<Cell> dependents = dependencies.get(cell);
         if (dependents != null) {
-            for (Cell dependent : dependents) {
+            for (Cell dependent : new ArrayList<>(dependents)) {
                 dependent.recalculate();
             }
         }

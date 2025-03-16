@@ -6,7 +6,6 @@ package excel.model;
 public enum CellError {
     SYNTAX_ERROR("SYNTAX_ERROR"),
     VALUE_ERROR("VALUE"),
-    DIV_ZERO("DIV/0"),
     CIRCULAR_REF("CIRCULAR REF");
     private final String message;
 

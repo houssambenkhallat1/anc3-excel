@@ -54,9 +54,6 @@ public class CellValue {
         return booleanValue;
     }
 
-    public CellError getErrorValue() {
-        return errorValue;
-    }
 
     public boolean isText() {
         return type == Type.TEXT;

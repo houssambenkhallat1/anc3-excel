@@ -97,13 +97,6 @@ public class Cell {
         this.evaluating = evaluating;
     }
 
-    public int getRow() {
-        return row;
-    }
-
-    public int getColumn() {
-        return column;
-    }
 
     /**
      * Met à jour la valeur calculée de la cellule en fonction de son contenu
