@@ -12,6 +12,15 @@ public class ReferenceExpression implements Expression {
     public ReferenceExpression(String cellReference, SpreadsheetModel spreadsheet, Cell sourceCell) {
         this.cellReference = cellReference;
         this.sourceCell = sourceCell;
+        if (spreadsheet != null && sourceCell != null) {
+            int[] coords = ExcelConverter.excelToRowCol(cellReference);
+            int row = coords[0];
+            int col = coords[1];
+            Cell referencedCell = spreadsheet.getCell(row, col);
+            if (referencedCell != null) {
+                spreadsheet.addDependency(sourceCell, referencedCell);
+            }
+        }
     }
 
     public ReferenceExpression(String cellReference) {
@@ -33,12 +42,13 @@ public class ReferenceExpression implements Expression {
             return CellValue.ofError(CellError.VALUE_ERROR);
         }
 
-        // Vérifier si la cellule référencée est déjà en cours d'évaluation (détection de cycle)
+
+        // Vérifie la présence d'une référence circulaire
         if (referencedCell.isEvaluating()) {
-            throw new CircularReferenceException("Référence circulaire détectée: " + cellReference);
+            throw new CircularReferenceException("Circular reference detected: " + cellReference);
         }
 
-        // Renvoyer la valeur de la cellule référencée
+        // Retourne la valeur de la cellule référencée
         return referencedCell.getValue();
     }
 }

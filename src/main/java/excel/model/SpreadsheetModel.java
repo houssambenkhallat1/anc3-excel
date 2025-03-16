@@ -1,9 +1,6 @@
 package excel.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Modèle principal du tableur
@@ -51,9 +48,16 @@ public class SpreadsheetModel {
     /**
      * Enregistre une dépendance entre cellules
      */
-    public void addDependency(Cell dependentCell, Cell sourceCell) {
+    public void addDependency(Cell dependentCell, Cell sourceCell) throws CircularReferenceException {
+        // Prevent adding a dependency if it would cause a cycle
+        if (hasCircularDependency(sourceCell, dependentCell)) {
+            throw new CircularReferenceException(
+                    "Circular dependency detected when adding dependency from "
+                            + dependentCell.getAddress() + " to " + sourceCell.getAddress());
+        }
         dependencies.computeIfAbsent(sourceCell, k -> new ArrayList<>()).add(dependentCell);
     }
+
 
     /**
      * Notifie les cellules dépendantes lorsqu'une cellule change
@@ -65,5 +69,29 @@ public class SpreadsheetModel {
                 dependent.recalculate();
             }
         }
+    }
+
+    public boolean hasCircularDependency(Cell source, Cell dependent) {
+        return hasPath(dependent, source, new HashSet<>());
+    }
+
+    private boolean hasPath(Cell current, Cell target, Set<Cell> visited) {
+        if (current == target) {
+            return true;
+        }
+        if (visited.contains(current)) {
+            return false;
+        }
+
+        visited.add(current);
+        List<Cell> dependents = dependencies.get(current);
+        if (dependents != null) {
+            for (Cell next : dependents) {
+                if (hasPath(next, target, visited)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

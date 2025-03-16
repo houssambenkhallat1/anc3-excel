@@ -24,7 +24,9 @@ public class Cell {
 
         // Mettre à jour la valeur quand le contenu change
         content.addListener((obs, oldVal, newVal) -> {
+            String contentText = content.get();
             updateValue();
+            this.setContent(contentText);
         });
 
         // Mettre à jour la valeur d'affichage quand la valeur change
@@ -187,4 +189,5 @@ public class Cell {
     public String toString() {
         return "Cell[" + getAddress() + ", content=" + getContent() + ", value=" + getValue() + "]";
     }
+
 }

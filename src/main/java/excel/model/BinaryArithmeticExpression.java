@@ -37,6 +37,7 @@ public class BinaryArithmeticExpression implements Expression {
         // Vérifier si l'une des opérandes est une erreur
         if (leftValue.isError()) return leftValue;
         if (rightValue.isError()) return rightValue;
+        if (!leftValue.isNumber() || !rightValue.isNumber()) return CellValue.ofError(CellError.SYNTAX_ERROR);
 
         // Pour les opérations arithmétiques, convertir en nombres
         double leftNum = leftValue.isNumber() ? leftValue.getNumberValue() :
@@ -54,7 +55,7 @@ public class BinaryArithmeticExpression implements Expression {
                 return CellValue.ofNumber(leftNum * rightNum);
             case DIVIDE:
                 if (rightNum == 0) {
-                    return CellValue.ofError(CellError.DIV_ZERO);
+                    return CellValue.ofError(CellError.VALUE_ERROR);
                 }
                 return CellValue.ofNumber(leftNum / rightNum);
             default:
