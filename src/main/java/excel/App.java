@@ -1,44 +1,30 @@
 package excel;
 
+import excel.model.SpreadsheetModel;
+import excel.view.MainView;
+import excel.viewmodel.SpreadsheetViewModel;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.controlsfx.control.spreadsheet.GridBase;
-import org.controlsfx.control.spreadsheet.SpreadsheetCell;
-import org.controlsfx.control.spreadsheet.SpreadsheetCellType;
-import org.controlsfx.control.spreadsheet.SpreadsheetView;
 
 public class App extends Application {
+    private static final int ROWS = 10;
+    private static final int COLUMNS = 4;
 
     @Override
     public void start(Stage primaryStage) {
+        // Créer le modèle
+        SpreadsheetModel model = new SpreadsheetModel(ROWS, COLUMNS);
 
-        // L'exemple ci-dessous est tiré de la documentation de ControlsFX
-        // https://controlsfx.github.io/javadoc/11.1.0/org.controlsfx.controls/org/controlsfx/control/spreadsheet/SpreadsheetView.html
-        int rowCount = 15;
-        int columnCount = 10;
+        // Créer le ViewModel
+        SpreadsheetViewModel viewModel = new SpreadsheetViewModel(model);
 
-        GridBase grid = new GridBase(rowCount, columnCount);
-        ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
-        for (int row = 0; row < grid.getRowCount(); ++row) {
-            final ObservableList<SpreadsheetCell> list = FXCollections.observableArrayList();
-            for (int column = 0; column < grid.getColumnCount(); ++column) {
-                SpreadsheetCell cell = SpreadsheetCellType.STRING.createCell(row, column, 1, 1,"value");
-                // INFO : une SpreadsheetCell a un itemProperty qui encapsule la valeur de la cellule (cell.itemProperty())
-                list.add(cell);
-            }
-            rows.add(list);
-        }
-        grid.setRows(rows);
+        // Créer la vue
+        MainView mainView = new MainView(viewModel);
 
-        SpreadsheetView spreadsheetView = new SpreadsheetView(grid);
-        // INFO : un SpreadsheetView a un selectionModel qui permet de gérer les cellules sélectionnées
-        // INFO : un SpreadsheetView a un editingCellProperty qui permet de récupérer la cellule en cours d'édition
-
-        Scene scene = new Scene(spreadsheetView, 633, 315);
-        primaryStage.setTitle("Spreadsheet");
+        // Configurer la scène
+        Scene scene = new Scene(mainView, 800, 600);
+        primaryStage.setTitle("Mini Tableur");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
