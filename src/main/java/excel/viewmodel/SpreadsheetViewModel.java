@@ -118,12 +118,6 @@ public class SpreadsheetViewModel {
         }
     }
 
-    /**
-     * Propriété indiquant si le tableur est éditable
-     */
-    public ReadOnlyBooleanProperty editableProperty() {
-        return this.editableProperty;
-    }
 
     /**
      * Ajoute une action au journal
@@ -132,17 +126,5 @@ public class SpreadsheetViewModel {
         return actions.add(action);
     }
 
-    /**
-     * Retourne la dernière action effectuée
-     */
-    public ReadOnlyStringProperty lastActionProperty() {
-        return lastAction;
-    }
 
-    /**
-     * Retourne la liste des actions
-     */
-    public ObservableList<String> getActions() {
-        return FXCollections.unmodifiableObservableList(actions);
-    }
 }

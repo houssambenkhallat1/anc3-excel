@@ -1,0 +1,119 @@
+@startuml Spreadsheet Domain Model
+
+' Abstract classes and interfaces
+abstract class CellValue {
+
+}
+
+interface Expression {
+  +evaluate(context: SpreadsheetModel): CellValue
+}
+
+' Main classes
+class SpreadsheetModel {
+  -cells: Cell[][]
+  -rowCount: int
+  -columnCount: int
+  -expressionBuilder: ExpressionBuilder
+  -dependencies: Map<Cell, List<Cell>>
+
+}
+
+class Cell {
+  -row: int
+  -col: int
+  -textContent: String
+  -value: CellValue
+  -expression: Expression
+  -observers: List<Observer>
+
+}
+
+class ExpressionBuilder {
+  +build(text: String): Expression
+  -parseExpression(text: String): Expression
+
+}
+
+' Expression implementations
+class LiteralExpression {
+  -literalValue: CellValue
+  +evaluate(context: SpreadsheetModel): CellValue
+}
+
+class ReferenceExpression {
+  -reference: String
+  +evaluate(context: SpreadsheetModel): CellValue
+}
+
+class BinaryArithmeticExpression {
+  -leftOperand: Expression
+  -rightOperand: Expression
+  -operator: String
+  +evaluate(context: SpreadsheetModel): CellValue
+}
+
+class ComparisonExpression {
+  -leftOperand: Expression
+  -rightOperand: Expression
+  -operator: String
+  +evaluate(context: SpreadsheetModel): CellValue
+}
+
+class LogicalExpression {
+  -operands: List<Expression>
+  -operator: String
+  +evaluate(context: SpreadsheetModel): CellValue
+}
+
+' CellValue implementations
+class NumberValue {
+  -value: double
+  +getValue(): double
+  +toString(): String
+}
+
+class BooleanValue {
+  -value: boolean
+  +getValue(): boolean
+  +toString(): String
+}
+
+class TextValue {
+  -value: String
+  +getValue(): String
+  +toString(): String
+}
+
+class ErrorValue {
+  -errorMessage: String
+  +getErrorMessage(): String
+  +toString(): String
+}
+
+' Relationships
+SpreadsheetModel "1" *-- "many" Cell : contains
+Cell --> "1" Expression : has
+Cell --> "1" CellValue : has
+
+LiteralExpression ..|> Expression
+ReferenceExpression ..|> Expression
+BinaryArithmeticExpression ..|> Expression
+ComparisonExpression ..|> Expression
+LogicalExpression ..|> Expression
+
+NumberValue --|> CellValue
+BooleanValue --|> CellValue
+TextValue --|> CellValue
+ErrorValue --|> CellValue
+
+ExpressionBuilder ..> Expression : creates
+
+' Observer pattern
+interface Observer {
+  +update(cell: Cell): void
+}
+
+Cell "1" o-- "many" Observer : notifies
+
+@enduml

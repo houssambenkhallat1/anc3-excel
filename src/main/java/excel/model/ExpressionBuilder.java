@@ -10,8 +10,6 @@ import java.util.regex.Pattern;
  */
 public class ExpressionBuilder {
     private static final Pattern CELL_REFERENCE_PATTERN = Pattern.compile("([A-Z]+)([0-9]+)");
-    private static final Pattern NUMBER_PATTERN = Pattern.compile("^-?\\d+([,.]\\d+)?$");
-    private static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(true|false|TRUE|FALSE)$");
 
     private final SpreadsheetModel spreadsheet;
 

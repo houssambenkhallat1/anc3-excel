@@ -69,9 +69,6 @@ public class Cell {
         return displayValue;
     }
 
-    public String getDisplayValue() {
-        return displayValue.get();
-    }
 
     public CellValue getValue() {
         return value.get();
@@ -81,9 +78,6 @@ public class Cell {
         this.value.set(value);
     }
 
-    public Expression getExpression() {
-        return expression;
-    }
 
     private void setExpression(Expression expression) {
         this.expression = expression;
