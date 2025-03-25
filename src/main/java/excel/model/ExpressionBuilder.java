@@ -47,7 +47,9 @@ public class ExpressionBuilder {
 
             // Analyse syntaxique et construction de l'expression
             return parseExpression(tokens, sourceCell);
-        } catch (Exception e) {
+        } catch (CircularReferenceException e) {
+            return new LiteralExpression(CellValue.ofError(CellError.CIRCULAR_REF));
+        } catch ( Exception e){
             return new LiteralExpression(CellValue.ofError(CellError.SYNTAX_ERROR));
         }
     }

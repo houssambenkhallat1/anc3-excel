@@ -18,6 +18,9 @@ public class ReferenceExpression implements Expression {
             int col = coords[1];
             Cell referencedCell = spreadsheet.getCell(row, col);
             if (referencedCell != null) {
+                if (referencedCell.getValue().format().compareTo(sourceCell.getAddress())==0){
+                    throw new CircularReferenceException("Circular reference detected: " + cellReference);
+                }
                 spreadsheet.addDependency(sourceCell, referencedCell);
             }
         }
