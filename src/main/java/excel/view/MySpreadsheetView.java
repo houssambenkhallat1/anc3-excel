@@ -19,6 +19,7 @@ public class MySpreadsheetView extends SpreadsheetView {
     private final SpreadsheetViewModel viewModel;
     private static final int CELL_PREF_WIDTH = 150;
     private final GridBase grid;
+    private boolean updatingCellFromViewModel = false;
 
     public MySpreadsheetView(SpreadsheetViewModel viewModel) {
         this.viewModel = viewModel;
@@ -77,7 +78,7 @@ public class MySpreadsheetView extends SpreadsheetView {
 
                 // Lier la modification de cellule dans la vue au ViewModel
                 cell.itemProperty().addListener((observableValue, oldVal, newVal) -> {
-                    if (!Objects.equals(oldVal, newVal) && newVal != null) {
+                    if (!Objects.equals(oldVal, newVal) && newVal != null && !updatingCellFromViewModel) {
                         viewModel.updateCellContent(finalRow, finalColumn, (String) newVal);
                     }
                 });
@@ -85,7 +86,9 @@ public class MySpreadsheetView extends SpreadsheetView {
                 // Lier les modifications du ViewModel à la vue
                 viewModel.getCellValueProperty(finalRow, finalColumn).addListener((observableValue, oldVal, newVal) -> {
                     if (!Objects.equals(oldVal, newVal) && !Objects.equals(cell.getItem(), newVal)) {
+                        updatingCellFromViewModel = true;
                         cell.setItem(newVal);
+                        updatingCellFromViewModel = false;
                     }
                 });
 
