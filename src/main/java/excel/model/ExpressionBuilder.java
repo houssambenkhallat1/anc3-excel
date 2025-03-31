@@ -350,7 +350,7 @@ public class ExpressionBuilder {
         switch (token.type) {
             case FUNCTION:
                 return new ParseResult(
-                        new FunctionExpression(tokens.get(2).value,tokens.get(4).value,sourceCell),tokens.size());
+                        new FunctionExpression(tokens.get(startIndex+2).value,tokens.get(startIndex+4).value,sourceCell),startIndex + 6);
 
             case NUMBER:
                 double number = Double.parseDouble(token.value.replace(',', '.'));
