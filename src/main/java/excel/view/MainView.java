@@ -39,16 +39,48 @@ public class MainView extends BorderPane {
         Menu fileMenu = new Menu("File");
         MenuItem saveItem = new MenuItem("Save");
         MenuItem openItem = new MenuItem("Open");
+        saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+        openItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
         fileMenu.getItems().addAll(openItem, saveItem);
 
         // Edit Menu (Placeholder)
         Menu editMenu = new Menu("Edit");
         MenuItem undoItem = new MenuItem("Undo");
         MenuItem redoItem = new MenuItem("Redo");
+        // Set actions
+        undoItem.setOnAction(e -> viewModel.undo());
+        redoItem.setOnAction(e -> viewModel.redo());
+        // Ajouter les raccourcis clavier
+        undoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_DOWN));
+        redoItem.setAccelerator(new KeyCodeCombination(KeyCode.Y, KeyCombination.CONTROL_DOWN));
 
         editMenu.getItems().addAll(undoItem, redoItem);
 
+        // Gestion des raccourcis au niveau de la scène
+        this.setOnKeyPressed(event -> {
+            if (event.isControlDown()) {
+                if (event.getCode() == KeyCode.Z) {
+                    viewModel.undo();
+                    event.consume();
+                } else if (event.getCode() == KeyCode.Y) {
+                    viewModel.redo();
+                    event.consume();
+                }
+                else if (event.getCode() == KeyCode.S) {
+                    handleSave(viewModel, stage);
+                    event.consume();
+                } else if (event.getCode() == KeyCode.N) {
+                    handleOpen(viewModel, stage);
+                    event.consume();
+                }
+            }
+        });
+
+
+
         menuBar.getMenus().addAll(fileMenu, editMenu);
+        undoItem.disableProperty().bind(viewModel.canUndoProperty().not());
+        redoItem.disableProperty().bind(viewModel.canRedoProperty().not());
 
 
         // Set actions for Save and Open

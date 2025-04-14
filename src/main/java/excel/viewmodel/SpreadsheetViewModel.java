@@ -2,20 +2,28 @@ package excel.viewmodel;
 
 import excel.model.Cell;
 import excel.model.SpreadsheetFileHandler;
+import java.io.IOException;
 import excel.tools.ExcelConverter;
 import excel.model.SpreadsheetModel;
 import javafx.beans.property.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
-import java.io.IOException;
-
 /**
  * ViewModel pour le tableur
  */
 public class SpreadsheetViewModel {
+    private final Deque<Command> undoStack = new ArrayDeque<>();
+    private final Deque<Command> redoStack = new ArrayDeque<>();
+    private final BooleanProperty canUndo = new SimpleBooleanProperty(false);
+    private final BooleanProperty canRedo = new SimpleBooleanProperty(false);
+
     private final SpreadsheetModel model;
     private final StringProperty editBarContent = new SimpleStringProperty("");
     private final ObjectProperty<int[]> selectedCell = new SimpleObjectProperty<>();
@@ -49,7 +57,29 @@ public class SpreadsheetViewModel {
             }
         });
     }
+    public SpreadsheetModel getModel() {
+        return model;
+    }
+    public void loadFromFile(String filepath) throws IOException, IllegalArgumentException {
+        SpreadsheetModel newModel = SpreadsheetFileHandler.loadSpreadsheet(filepath);
 
+        // Check dimensions
+        if (newModel.getRowCount() != model.getRowCount() || newModel.getColumnCount() != model.getColumnCount()) {
+            throw new IllegalArgumentException("Loaded file dimensions do not match current spreadsheet.");
+        }
+
+        // Copy cell contents
+        for (int row = 0; row < model.getRowCount(); row++) {
+            for (int col = 0; col < model.getColumnCount(); col++) {
+                Cell newCell = newModel.getCell(row, col);
+                Cell currentCell = model.getCell(row, col);
+                currentCell.setContent(newCell.getContent());
+            }
+        }
+        undoStack.clear();
+        redoStack.clear();
+        updateUndoRedoState();
+    }
     public int getRowCount() {
         return model.getRowCount();
     }
@@ -106,8 +136,47 @@ public class SpreadsheetViewModel {
         addAction("Update cell content at " + row + "," + column + ": " + content);
         Cell cell = model.getCell(row, column);
         if (cell != null) {
-            cell.setContent(content);
+            String oldContent = cell.getContent();
+            Command command = new CellChangeCommand(model, row, column, oldContent, content);
+            executeCommand(command);
         }
+    }
+    private void executeCommand(Command command) {
+        undoStack.push(command);
+        command.execute();
+        redoStack.clear();
+        updateUndoRedoState();
+    }
+
+    public void undo() {
+        if (!undoStack.isEmpty()) {
+            Command command = undoStack.pop();
+            command.undo();
+            redoStack.push(command);
+            updateUndoRedoState();
+        }
+    }
+
+    public void redo() {
+        if (!redoStack.isEmpty()) {
+            Command command = redoStack.pop();
+            command.execute();
+            undoStack.push(command);
+            updateUndoRedoState();
+        }
+    }
+
+    private void updateUndoRedoState() {
+        canUndo.set(!undoStack.isEmpty());
+        canRedo.set(!redoStack.isEmpty());
+    }
+
+    public BooleanProperty canUndoProperty() {
+        return canUndo;
+    }
+
+    public BooleanProperty canRedoProperty() {
+        return canRedo;
     }
 
     /**
@@ -129,24 +198,5 @@ public class SpreadsheetViewModel {
         return actions.add(action);
     }
 
-    public SpreadsheetModel getModel() {
-        return model;
-    }
-    public void loadFromFile(String filepath) throws IOException, IllegalArgumentException {
-        SpreadsheetModel newModel = SpreadsheetFileHandler.loadSpreadsheet(filepath);
 
-        // Check dimensions
-        if (newModel.getRowCount() != model.getRowCount() || newModel.getColumnCount() != model.getColumnCount()) {
-            throw new IllegalArgumentException("Loaded file dimensions do not match current spreadsheet.");
-        }
-
-        // Copy cell contents
-        for (int row = 0; row < model.getRowCount(); row++) {
-            for (int col = 0; col < model.getColumnCount(); col++) {
-                Cell newCell = newModel.getCell(row, col);
-                Cell currentCell = model.getCell(row, col);
-                currentCell.setContent(newCell.getContent());
-            }
-        }
-    }
 }
