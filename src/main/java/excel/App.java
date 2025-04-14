@@ -20,7 +20,7 @@ public class App extends Application {
         SpreadsheetViewModel viewModel = new SpreadsheetViewModel(model);
 
         // Créer la vue
-        MainView mainView = new MainView(viewModel);
+        MainView mainView = new MainView(viewModel, primaryStage);
 
         // Configurer la scène
         Scene scene = new Scene(mainView, 800, 600);

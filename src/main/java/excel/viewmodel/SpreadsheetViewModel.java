@@ -1,6 +1,7 @@
 package excel.viewmodel;
 
 import excel.model.Cell;
+import excel.model.SpreadsheetFileHandler;
 import excel.tools.ExcelConverter;
 import excel.model.SpreadsheetModel;
 import javafx.beans.property.*;
@@ -8,6 +9,8 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+
+import java.io.IOException;
 
 /**
  * ViewModel pour le tableur
@@ -126,5 +129,24 @@ public class SpreadsheetViewModel {
         return actions.add(action);
     }
 
+    public SpreadsheetModel getModel() {
+        return model;
+    }
+    public void loadFromFile(String filepath) throws IOException, IllegalArgumentException {
+        SpreadsheetModel newModel = SpreadsheetFileHandler.loadSpreadsheet(filepath);
 
+        // Check dimensions
+        if (newModel.getRowCount() != model.getRowCount() || newModel.getColumnCount() != model.getColumnCount()) {
+            throw new IllegalArgumentException("Loaded file dimensions do not match current spreadsheet.");
+        }
+
+        // Copy cell contents
+        for (int row = 0; row < model.getRowCount(); row++) {
+            for (int col = 0; col < model.getColumnCount(); col++) {
+                Cell newCell = newModel.getCell(row, col);
+                Cell currentCell = model.getCell(row, col);
+                currentCell.setContent(newCell.getContent());
+            }
+        }
+    }
 }
