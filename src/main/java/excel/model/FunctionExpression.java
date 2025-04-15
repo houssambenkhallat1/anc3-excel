@@ -31,6 +31,7 @@ public class FunctionExpression implements Expression{
         for (int row = startCoords[0]; row <= endCoords[0]; row++) {
             for (int col = startCoords[1]; col <= endCoords[1]; col++) {
                 Cell cell = spreadsheet.getCell(row, col);
+                spreadsheet.addDependency(cellSource, cell);
 
                 // Vérifier si la cellule est dans le range
                 if (cell == null) {
@@ -53,8 +54,6 @@ public class FunctionExpression implements Expression{
 
                 // Convertir la valeur en nombre pour la somme
                 double numValue = cellValue.getNumberValue();
-
-
                 sum += numValue;
             }
         }

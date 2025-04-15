@@ -1,6 +1,7 @@
 package excel.view;
 
 
+import excel.model.Cell;
 import excel.viewmodel.SpreadsheetViewModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -45,6 +46,27 @@ public class MySpreadsheetView extends SpreadsheetView {
                 viewModel.selectCell(cell.getRow(), cell.getColumn());
             }
         });
+
+
+//        // Valider l'édition lorsque l'utilisateur appuie sur Entrée
+//        this.setOnMouseClicked(event -> {
+//            if (event.getClickCount() == 2) {
+//                System.out.println("double click");
+//                viewModel.upDateCell();
+//                event.consume();
+//            }
+//        });
+
+
+//        this.setOnMousePressed(event -> {
+//
+//                int[] selectedCell = viewModel.selectedCellProperty().get();
+//                if (selectedCell != null) {
+//                    System.out.println("double click");
+//                }
+//                event.consume();
+//
+//        });
 
         // Valider l'édition lorsque l'utilisateur appuie sur Entrée
         this.setOnKeyPressed(event -> {
