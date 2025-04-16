@@ -30,6 +30,9 @@ public class MainView extends BorderPane {
 
         // Spreadsheet view
         this.setCenter(new MySpreadsheetView(viewModel));
+
+        //pour garantir que le panneau reçoit les événements clavier
+        this.setFocusTraversable(true);
     }
 
     private MenuBar createMenuBar(SpreadsheetViewModel viewModel, Stage stage) {
@@ -67,10 +70,18 @@ public class MainView extends BorderPane {
                     event.consume();
                 }
                 else if (event.getCode() == KeyCode.S) {
-                    handleSave(viewModel, stage);
+                    try {
+                        viewModel.handleSave(stage);
+                    } catch (IOException e) {
+                        showErrorDialog("Save Error", "Could not save file: " + e.getMessage(), stage);
+                    };
                     event.consume();
                 } else if (event.getCode() == KeyCode.N) {
-                    handleOpen(viewModel, stage);
+                    try {
+                        viewModel.handleOpen(stage);
+                    } catch (IOException e) {
+                        showErrorDialog("Load Error", "Could not load file: " + e.getMessage(), stage);
+                    }
                     event.consume();
                 }
             }
@@ -84,44 +95,58 @@ public class MainView extends BorderPane {
 
 
         // Set actions for Save and Open
-        saveItem.setOnAction(event -> handleSave(viewModel, stage));
-        openItem.setOnAction(event -> handleOpen(viewModel, stage));
+        saveItem.setOnAction(event ->{
+        try {
+            viewModel.handleSave(stage);
+        } catch (IOException e) {
+            showErrorDialog("Save Error", "Could not save file: " + e.getMessage(), stage);
+                }
+        } );
+
+
+        openItem.setOnAction(event -> {
+            try {
+                viewModel.handleOpen(stage);
+            } catch (IOException e) {
+                showErrorDialog("Load Error", "Could not load file: " + e.getMessage(), stage);
+            }
+        } );
 
         return menuBar;
     }
 
-    private void handleSave(SpreadsheetViewModel viewModel, Stage stage) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Spreadsheet");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files (*.e4e)", "*.e4e"));
-        File file = fileChooser.showSaveDialog(stage);
-        if (file != null) {
-            try {
-                // Ensure .e4e extension
-                String path = file.getAbsolutePath();
-                if (!path.endsWith(".e4e")) {
-                    file = new File(path + ".e4e");
-                }
-                SpreadsheetFileHandler.saveSpreadsheet(viewModel.getModel(), file.getAbsolutePath());
-            } catch (IOException e) {
-                showErrorDialog("Save Error", "Could not save file: " + e.getMessage(), stage);
-            }
-        }
-    }
-
-    private void handleOpen(SpreadsheetViewModel viewModel, Stage stage) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Spreadsheet");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files (*.e4e)", "*.e4e"));
-        File file = fileChooser.showOpenDialog(stage);
-        if (file != null) {
-            try {
-                viewModel.loadFromFile(file.getAbsolutePath());
-            } catch (IOException | IllegalArgumentException e) {
-                showErrorDialog("Load Error", "Could not load file: " + e.getMessage(), stage);
-            }
-        }
-    }
+//    private void handleSave(SpreadsheetViewModel viewModel, Stage stage) {
+//        FileChooser fileChooser = new FileChooser();
+//        fileChooser.setTitle("Save Spreadsheet");
+//        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files (*.e4e)", "*.e4e"));
+//        File file = fileChooser.showSaveDialog(stage);
+//        if (file != null) {
+//            try {
+//                // Ensure .e4e extension
+//                String path = file.getAbsolutePath();
+//                if (!path.endsWith(".e4e")) {
+//                    file = new File(path + ".e4e");
+//                }
+//                SpreadsheetFileHandler.saveSpreadsheet(viewModel.getModel(), file.getAbsolutePath());
+//            } catch (IOException e) {
+//                showErrorDialog("Save Error", "Could not save file: " + e.getMessage(), stage);
+//            }
+//        }
+//    }
+//
+//    private void handleOpen(SpreadsheetViewModel viewModel, Stage stage) {
+//        FileChooser fileChooser = new FileChooser();
+//        fileChooser.setTitle("Open Spreadsheet");
+//        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files (*.e4e)", "*.e4e"));
+//        File file = fileChooser.showOpenDialog(stage);
+//        if (file != null) {
+//            try {
+//                viewModel.loadFromFile(file.getAbsolutePath());
+//            } catch (IOException | IllegalArgumentException e) {
+//                showErrorDialog("Load Error", "Could not load file: " + e.getMessage(), stage);
+//            }
+//        }
+//    }
 
     private void showErrorDialog(String title, String message, Stage stage) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

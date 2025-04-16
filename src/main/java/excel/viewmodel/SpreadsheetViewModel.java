@@ -2,6 +2,8 @@ package excel.viewmodel;
 
 import excel.model.Cell;
 import excel.model.SpreadsheetFileHandler;
+
+import java.io.File;
 import java.io.IOException;
 import excel.tools.ExcelConverter;
 import excel.model.SpreadsheetModel;
@@ -14,6 +16,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 /**
  * ViewModel pour le tableur
@@ -113,6 +117,19 @@ public class SpreadsheetViewModel {
         return new SimpleStringProperty("");
     }
 
+
+    public void upDateCell() {
+        int[] position = selectedCell.get();
+        if (position != null) {
+        Cell cell = model.getCell(position[0], position[1]);
+            if (cell != null) {
+                cell.displayValueProperty().set(cell.getContent());
+                }
+            }
+
+    }
+
+
     /**
      * Sélectionne une cellule
      */
@@ -196,6 +213,43 @@ public class SpreadsheetViewModel {
      */
     public boolean addAction(String action) {
         return actions.add(action);
+    }
+
+
+    public void handleSave(Stage stage) throws IOException{
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Spreadsheet");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files (*.e4e)", "*.e4e"));
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            try {
+                // Ensure .e4e extension
+                String path = file.getAbsolutePath();
+                if (!path.endsWith(".e4e")) {
+                    file = new File(path + ".e4e");
+                }
+                SpreadsheetFileHandler.saveSpreadsheet(this.getModel(), file.getAbsolutePath());
+            } catch (IOException e) {
+                throw new IOException();
+
+            }
+        }
+    }
+
+    public void handleOpen(Stage stage) throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Spreadsheet");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files (*.e4e)", "*.e4e"));
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                this.loadFromFile(file.getAbsolutePath());
+            } catch (IOException | IllegalArgumentException e) {
+                throw new IOException();
+
+            }
+        }
+
     }
 
 
