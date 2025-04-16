@@ -1,7 +1,5 @@
 package excel.view;
 
-
-import excel.model.Cell;
 import excel.viewmodel.SpreadsheetViewModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -34,7 +32,9 @@ public class MySpreadsheetView extends SpreadsheetView {
 
         // Écouter les changements de cellule en édition
         this.editingCellProperty().addListener((observableValue, oldVal, newVal) -> {
-            if (newVal != null) {
+            if ( oldVal != null){
+                viewModel.setNotEditingCell(oldVal.getRow(), oldVal.getColumn());
+            } else if (newVal != null) {
                 viewModel.setEditingCell(newVal.getRow(), newVal.getColumn());
             }
         });
@@ -47,27 +47,6 @@ public class MySpreadsheetView extends SpreadsheetView {
             }
         });
 
-
-//        // Valider l'édition lorsque l'utilisateur appuie sur Entrée
-//        this.setOnMouseClicked(event -> {
-//            if (event.getClickCount() == 2) {
-//                System.out.println("double click");
-//                viewModel.upDateCell();
-//                event.consume();
-//            }
-//        });
-
-
-//        this.setOnMousePressed(event -> {
-//
-//                int[] selectedCell = viewModel.selectedCellProperty().get();
-//                if (selectedCell != null) {
-//                    System.out.println("double click");
-//                }
-//                event.consume();
-//
-//        });
-
         // Valider l'édition lorsque l'utilisateur appuie sur Entrée
         this.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
@@ -78,7 +57,6 @@ public class MySpreadsheetView extends SpreadsheetView {
 
         layoutSpreadSheet();
     }
-
     private void layoutSpreadSheet() {
         for (int column = 0; column < grid.getColumnCount(); column++) {
             this.getColumns().get(column).setPrefWidth(CELL_PREF_WIDTH);
@@ -110,6 +88,7 @@ public class MySpreadsheetView extends SpreadsheetView {
                     if (!Objects.equals(oldVal, newVal) && !Objects.equals(cell.getItem(), newVal)) {
                         updatingCellFromViewModel = true;
                         cell.setItem(newVal);
+//                        System.out.println("new value" + newVal);
                         updatingCellFromViewModel = false;
                     }
                 });

@@ -2,7 +2,6 @@ package excel.viewmodel;
 
 import excel.model.Cell;
 import excel.model.SpreadsheetFileHandler;
-
 import java.io.File;
 import java.io.IOException;
 import excel.tools.ExcelConverter;
@@ -117,19 +116,6 @@ public class SpreadsheetViewModel {
         return new SimpleStringProperty("");
     }
 
-
-    public void upDateCell() {
-        int[] position = selectedCell.get();
-        if (position != null) {
-        Cell cell = model.getCell(position[0], position[1]);
-            if (cell != null) {
-                cell.displayValueProperty().set(cell.getContent());
-                }
-            }
-
-    }
-
-
     /**
      * Sélectionne une cellule
      */
@@ -143,7 +129,23 @@ public class SpreadsheetViewModel {
      */
     public void setEditingCell(int row, int column) {
         addAction("Editing cell at " + row + "," + column);
-        // Cette méthode peut être utilisée pour suivre l'état d'édition
+        Cell cell = model.getCell(row, column);
+        if (cell != null) {
+            cell.displayValueProperty().set(cell.getContent());
+        }
+    }
+
+    /**
+     * Indique qu'une cellule n'est plus en mode édition
+     */
+
+    public void setNotEditingCell(int row, int column) {
+        Cell cell = model.getCell(row, column);
+        if (cell != null) {
+            updateCellContent(row,column, cell.getContent());
+//            cell.displayValueProperty().set(cell.getValue().format());
+//            System.out.println("updated value " + cell.displayValueProperty().get());
+        }
     }
 
     /**
@@ -207,14 +209,12 @@ public class SpreadsheetViewModel {
         }
     }
 
-
     /**
      * Ajoute une action au journal
      */
     public boolean addAction(String action) {
         return actions.add(action);
     }
-
 
     public void handleSave(Stage stage) throws IOException{
         FileChooser fileChooser = new FileChooser();
@@ -235,7 +235,6 @@ public class SpreadsheetViewModel {
             }
         }
     }
-
     public void handleOpen(Stage stage) throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Spreadsheet");
@@ -251,6 +250,4 @@ public class SpreadsheetViewModel {
         }
 
     }
-
-
 }
