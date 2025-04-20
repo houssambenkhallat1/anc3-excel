@@ -76,6 +76,12 @@ public class Cell {
 
     private void setValue(CellValue value) {
         this.value.set(value);
+        notifyDisplayValue();
+    }
+    private void notifyDisplayValue(){
+        if (getValue() != null) {
+            displayValue.set(getValue().format());
+        }
     }
 
 
