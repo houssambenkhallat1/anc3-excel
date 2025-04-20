@@ -1,0 +1,42 @@
+@startuml
+actor Utilisateur
+participant "MainView" as View
+participant "SpreadsheetViewModel" as VM
+participant "CellChangeCommand" as Command
+participant "SpreadsheetModel" as Model
+participant "UndoStack" as US
+participant "RedoStack" as RS
+
+== Modification de cellule ==
+Utilisateur -> View: Modifie une cellule (ex: "=A1+B2")
+View -> VM: updateCellContent(row, col, newValue)
+VM -> VM: create CellChangeCommand(oldValue, newValue)
+VM -> US: push(command)
+VM -> Command: execute()
+Command -> Model: setCellContentSilently(row, col, newValue)
+Model --> Command:
+Command --> VM:
+VM --> View: Rafraîchit l'affichage
+
+== Undo ==
+Utilisateur -> View: Ctrl+Z (Undo)
+View -> VM: undo()
+VM -> US: pop()
+VM -> Command: undo()
+Command -> Model: setCellContentSilently(row, col, oldValue)
+Model --> Command:
+Command --> VM:
+VM -> RS: push(command)
+VM --> View: Rafraîchit l'affichage
+
+== Redo ==
+Utilisateur -> View: Ctrl+Y (Redo)
+View -> VM: redo()
+VM -> RS: pop()
+VM -> Command: execute()
+Command -> Model: setCellContentSilently(row, col, newValue)
+Model --> Command:
+Command --> VM:
+VM -> US: push(command)
+VM --> View: Rafraîchit l'affichage
+@enduml
