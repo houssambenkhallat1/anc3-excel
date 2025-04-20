@@ -94,4 +94,12 @@ public class SpreadsheetModel {
         }
         return false;
     }
+    public void setCellContentSilently(int row, int col, String content) {
+        Cell cell = getCell(row, col);
+        if (cell != null) {
+            cell.setContent(content);
+            cell.updateValue();
+            notifyCellChanged(cell);
+        }
+    }
 }

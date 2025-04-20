@@ -1,6 +1,5 @@
 package excel.view;
 
-
 import excel.viewmodel.SpreadsheetViewModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -19,6 +18,7 @@ public class MySpreadsheetView extends SpreadsheetView {
     private final SpreadsheetViewModel viewModel;
     private static final int CELL_PREF_WIDTH = 150;
     private final GridBase grid;
+    private boolean updatingCellFromViewModel = false; // empêche d'update le contenu de la cellule lorsque l'on set display value
 
     public MySpreadsheetView(SpreadsheetViewModel viewModel) {
         this.viewModel = viewModel;
@@ -32,7 +32,9 @@ public class MySpreadsheetView extends SpreadsheetView {
 
         // Écouter les changements de cellule en édition
         this.editingCellProperty().addListener((observableValue, oldVal, newVal) -> {
-            if (newVal != null) {
+            if ( oldVal != null){
+                viewModel.setNotEditingCell(oldVal.getRow(), oldVal.getColumn());
+            } else if (newVal != null) {
                 viewModel.setEditingCell(newVal.getRow(), newVal.getColumn());
             }
         });
@@ -55,7 +57,6 @@ public class MySpreadsheetView extends SpreadsheetView {
 
         layoutSpreadSheet();
     }
-
     private void layoutSpreadSheet() {
         for (int column = 0; column < grid.getColumnCount(); column++) {
             this.getColumns().get(column).setPrefWidth(CELL_PREF_WIDTH);
@@ -77,7 +78,7 @@ public class MySpreadsheetView extends SpreadsheetView {
 
                 // Lier la modification de cellule dans la vue au ViewModel
                 cell.itemProperty().addListener((observableValue, oldVal, newVal) -> {
-                    if (!Objects.equals(oldVal, newVal) && newVal != null) {
+                    if (!Objects.equals(oldVal, newVal) && newVal != null && !updatingCellFromViewModel) {
                         viewModel.updateCellContent(finalRow, finalColumn, (String) newVal);
                     }
                 });
@@ -85,7 +86,9 @@ public class MySpreadsheetView extends SpreadsheetView {
                 // Lier les modifications du ViewModel à la vue
                 viewModel.getCellValueProperty(finalRow, finalColumn).addListener((observableValue, oldVal, newVal) -> {
                     if (!Objects.equals(oldVal, newVal) && !Objects.equals(cell.getItem(), newVal)) {
+                        updatingCellFromViewModel = true;
                         cell.setItem(newVal);
+                        updatingCellFromViewModel = false;
                     }
                 });
 

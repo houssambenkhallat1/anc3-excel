@@ -20,7 +20,7 @@ public class ExpressionBuilder {
 
     // Tokens pour l'analyse lexicale
     private enum TokenType {
-        NUMBER, BOOLEAN, TEXT, CELL_REFERENCE, OPERATOR, LOGICAL_OPERATOR, COMPARISON_OPERATOR, WHITESPACE
+        NUMBER, BOOLEAN, TEXT, CELL_REFERENCE, OPERATOR, LOGICAL_OPERATOR, COMPARISON_OPERATOR, FUNCTION, PARENTHESIS
     }
 
     private static class Token {
@@ -47,7 +47,9 @@ public class ExpressionBuilder {
 
             // Analyse syntaxique et construction de l'expression
             return parseExpression(tokens, sourceCell);
-        } catch (Exception e) {
+        } catch (CircularReferenceException e) {
+            return new LiteralExpression(CellValue.ofError(CellError.CIRCULAR_REF));
+        } catch ( Exception e){
             return new LiteralExpression(CellValue.ofError(CellError.SYNTAX_ERROR));
         }
     }
@@ -74,6 +76,18 @@ public class ExpressionBuilder {
                     currentToken.setLength(0);
                     currentType = null;
                 }
+                continue;
+            }
+
+            //PARENTHESIS
+            if(c == '(' || c == ')' || c == ':'){
+                if (currentType != null) {
+                    tokens.add(new Token(currentType, currentToken.toString()));
+                    currentToken.setLength(0);
+                }
+                tokens.add(new Token(TokenType.PARENTHESIS, String.valueOf(c)));
+                currentToken.setLength(0);
+                currentType = null;
                 continue;
             }
 
@@ -163,7 +177,9 @@ public class ExpressionBuilder {
                 } else if (token.value.equalsIgnoreCase("true") ||
                         token.value.equalsIgnoreCase("false")) {
                     processedTokens.add(new Token(TokenType.BOOLEAN, token.value.toLowerCase()));
-                } else {
+                }else if (token.value.equalsIgnoreCase("sum")) {
+                    processedTokens.add(new Token(TokenType.FUNCTION, token.value.toLowerCase()));
+                }  else {
                     processedTokens.add(new Token(TokenType.TEXT, token.value));
                 }
             } else {
@@ -332,6 +348,10 @@ public class ExpressionBuilder {
         Token token = tokens.get(startIndex);
 
         switch (token.type) {
+            case FUNCTION:
+                return new ParseResult(
+                        new FunctionExpression(tokens.get(startIndex+2).value,tokens.get(startIndex+4).value,sourceCell),startIndex + 6);
+
             case NUMBER:
                 double number = Double.parseDouble(token.value.replace(',', '.'));
                 return new ParseResult(
