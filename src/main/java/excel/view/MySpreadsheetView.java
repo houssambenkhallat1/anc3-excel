@@ -18,7 +18,7 @@ public class MySpreadsheetView extends SpreadsheetView {
     private final SpreadsheetViewModel viewModel;
     private static final int CELL_PREF_WIDTH = 150;
     private final GridBase grid;
-    private boolean updatingCellFromViewModel = false;
+    private boolean updatingCellFromViewModel = false; // empêche d'update le contenu de la cellule lorsque l'on set display value
 
     public MySpreadsheetView(SpreadsheetViewModel viewModel) {
         this.viewModel = viewModel;
@@ -88,7 +88,6 @@ public class MySpreadsheetView extends SpreadsheetView {
                     if (!Objects.equals(oldVal, newVal) && !Objects.equals(cell.getItem(), newVal)) {
                         updatingCellFromViewModel = true;
                         cell.setItem(newVal);
-//                        System.out.println("new value" + newVal);
                         updatingCellFromViewModel = false;
                     }
                 });

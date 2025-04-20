@@ -143,8 +143,6 @@ public class SpreadsheetViewModel {
         Cell cell = model.getCell(row, column);
         if (cell != null) {
             updateCellContent(row,column, cell.getContent());
-//            cell.displayValueProperty().set(cell.getValue().format());
-//            System.out.println("updated value " + cell.displayValueProperty().get());
         }
     }
 

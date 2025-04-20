@@ -178,7 +178,7 @@ public class ExpressionBuilder {
                         token.value.equalsIgnoreCase("false")) {
                     processedTokens.add(new Token(TokenType.BOOLEAN, token.value.toLowerCase()));
                 }else if (token.value.equalsIgnoreCase("sum")) {
-                    processedTokens.add(new Token(TokenType.FUNCTION, "sum"));
+                    processedTokens.add(new Token(TokenType.FUNCTION, token.value.toLowerCase()));
                 }  else {
                     processedTokens.add(new Token(TokenType.TEXT, token.value));
                 }
