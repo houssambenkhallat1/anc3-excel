@@ -92,7 +92,7 @@ public class ExpressionBuilder {
             }
 
             // Opérateur
-            if (c == '+' || c == '-' || c == '*' || c == '/') {
+            if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^') {
                 if (currentType != null) {
                     tokens.add(new Token(currentType, currentToken.toString()));
                     currentToken.setLength(0);
@@ -179,6 +179,8 @@ public class ExpressionBuilder {
                     processedTokens.add(new Token(TokenType.BOOLEAN, token.value.toLowerCase()));
                 }else if (token.value.equalsIgnoreCase("sum")) {
                     processedTokens.add(new Token(TokenType.FUNCTION, token.value.toLowerCase()));
+                }else if (token.value.equalsIgnoreCase("^")) {
+                    processedTokens.add(new Token(TokenType.OPERATOR, token.value.toLowerCase()));
                 }  else {
                     processedTokens.add(new Token(TokenType.TEXT, token.value));
                 }
@@ -322,11 +324,11 @@ public class ExpressionBuilder {
         int i = left.nextTokenIndex;
         while (i < tokens.size() &&
                 tokens.get(i).type == TokenType.OPERATOR &&
-                (tokens.get(i).value.equals("*") || tokens.get(i).value.equals("/"))) {
+                (tokens.get(i).value.equals("^") || tokens.get(i).value.equals("*") || tokens.get(i).value.equals("/"))) {
 
-            BinaryArithmeticExpression.Operator operator = tokens.get(i).value.equals("*") ?
-                    BinaryArithmeticExpression.Operator.MULTIPLY :
-                    BinaryArithmeticExpression.Operator.DIVIDE;
+            BinaryArithmeticExpression.Operator operator = tokens.get(i).value.equals("^") ?
+                    BinaryArithmeticExpression.Operator.POWER : tokens.get(i).value.equals("*") ?
+                    BinaryArithmeticExpression.Operator.MULTIPLY : BinaryArithmeticExpression.Operator.DIVIDE;
 
             ParseResult right = parsePrimary(tokens, i + 1, sourceCell);
             left = new ParseResult(
