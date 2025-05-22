@@ -33,6 +33,11 @@ public class MainView extends BorderPane {
 
         //pour garantir que le panneau reçoit les événements clavier
         this.setFocusTraversable(true);
+
+        Label footerLabel = new Label("footer label");
+
+        this.setBottom(footerLabel);
+
     }
 
     private MenuBar createMenuBar(SpreadsheetViewModel viewModel, Stage stage) {
