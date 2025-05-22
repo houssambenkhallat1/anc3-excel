@@ -179,9 +179,8 @@ public class ExpressionBuilder {
                     processedTokens.add(new Token(TokenType.BOOLEAN, token.value.toLowerCase()));
                 }else if (token.value.equalsIgnoreCase("sum")) {
                     processedTokens.add(new Token(TokenType.FUNCTION, token.value.toLowerCase()));
-                }else if (token.value.equalsIgnoreCase("^")) {
-                    processedTokens.add(new Token(TokenType.OPERATOR, token.value.toLowerCase()));
-                }  else {
+                }
+                else {
                     processedTokens.add(new Token(TokenType.TEXT, token.value));
                 }
             } else {
