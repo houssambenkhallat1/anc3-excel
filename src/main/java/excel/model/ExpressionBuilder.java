@@ -67,8 +67,8 @@ public class ExpressionBuilder {
         try {
             // Analyse lexicale
             List<Token> tokens = tokenize(content);
-            setSumCountInBuilder(counterSum);
-
+            sourceCell.setCounterSumAndPowInCell(counterSum);
+            counterSum = 0;
             // Analyse syntaxique et construction de l'expression
 
             return parseExpression(tokens, sourceCell);

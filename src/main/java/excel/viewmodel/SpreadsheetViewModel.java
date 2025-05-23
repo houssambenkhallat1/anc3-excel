@@ -254,6 +254,10 @@ public class SpreadsheetViewModel {
         }
     }
     public IntegerProperty sumAndPow() {
-        return model.sumCountAndPowInSpreadheetProperty();
+        return this.model.sumCountAndPowInSpreadheetProperty();
+    }
+
+    public int updateSumAndPower() {
+        return this.model.sumCountAndPowInSpreadheetProperty().get();
     }
 }

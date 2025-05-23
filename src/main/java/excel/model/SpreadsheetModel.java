@@ -25,7 +25,8 @@ public class SpreadsheetModel {
     }
 
     public void setSumCountAndPowInSpreadheet(int sumCountAndPowInSpreadheet) {
-        this.sumCountAndPowInSpreadheet.set(sumCountAndPowInSpreadheet);
+        this.sumCountAndPowInSpreadheet.set(getSumCountAndPowInSpreadheet() + sumCountAndPowInSpreadheet);
+        System.out.println(getSumCountAndPowInSpreadheet());
     }
 
     private final Map<Cell, List<Cell>> dependencies = new HashMap<>();

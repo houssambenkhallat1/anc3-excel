@@ -14,6 +14,7 @@ import javafx.scene.control.Alert;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class MainView extends BorderPane {
 
@@ -45,14 +46,20 @@ public class MainView extends BorderPane {
         //pour garantir que le panneau reçoit les événements clavier
         this.setFocusTraversable(true);
 
-        Label footerLabel = new Label("footer label");
-
+        Label footerLabel = new Label("la somme total des fonction SUM & Puissance est : " + viewModel.updateSumAndPower());
+        viewModel.sumAndPow().addListener((observable, oldValue, newValue) -> {
+            if (!Objects.equals(oldValue, newValue)) {
+                if (newValue.intValue() > 0) {
+                    footerLabel.setText("la somme total des fonction SUM & Puissance est : " + newValue.intValue());
+                    footerLabel.setStyle("-fx-text-fill: green;");
+                } else {
+                    footerLabel.setText("la somme total des fonction SUM & Puissance est de 0");
+                    footerLabel.setStyle("-fx-text-fill: red;");
+                }
+            }
+        });
         this.setBottom(footerLabel);
-
     }
-
-
-
     private MenuBar createMenuBar(SpreadsheetViewModel viewModel, Stage stage) {
         MenuBar menuBar = new MenuBar();
 
@@ -105,8 +112,6 @@ public class MainView extends BorderPane {
                 }
             }
         });
-
-
 
         menuBar.getMenus().addAll(fileMenu, editMenu);
         undoItem.disableProperty().bind(viewModel.canUndoProperty().not());

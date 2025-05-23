@@ -50,7 +50,6 @@ public class Cell {
         });
 
         sumCountAndPowInCellModel.addListener((obs, oldVal, newVal) -> {
-
             spreadsheet.setSumCountAndPowInSpreadheet(newVal.intValue() - oldVal.intValue());
 
         });
@@ -124,6 +123,7 @@ public class Cell {
         if (contentText == null || contentText.isEmpty()) {
             setValue(CellValue.ofText(""));
             setExpression(null);
+            setSumCountAndPowInCellModel(0);
             return;
         }
 
@@ -153,6 +153,7 @@ public class Cell {
                 // Essayer d'interpréter comme une valeur littérale
                 setValue(parseContent(contentText));
                 setExpression(null);
+                setSumCountAndPowInCellModel(0);
             }
         } catch (Exception e) {
             setValue(CellValue.ofError(CellError.SYNTAX_ERROR));
