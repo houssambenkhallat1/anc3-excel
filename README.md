@@ -18,7 +18,8 @@
 
 ## Notes de version itération 3
 
-...
+ajout des fonctions exposant, min, max et avg + footer label
+ajout également de la modification de la taille du tableau (taille du tableau adaptable pour les tests)
 
 
 ## Pour lancer le projet
