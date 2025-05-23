@@ -27,7 +27,7 @@ public class SpreadsheetViewModel {
     private final BooleanProperty canUndo = new SimpleBooleanProperty(false);
     private final BooleanProperty canRedo = new SimpleBooleanProperty(false);
 
-    private final SpreadsheetModel model;
+    private SpreadsheetModel model;
     private final StringProperty editBarContent = new SimpleStringProperty("");
     private final ObjectProperty<int[]> selectedCell = new SimpleObjectProperty<>();
     private final SimpleBooleanProperty editableProperty = new SimpleBooleanProperty(true);
@@ -42,7 +42,7 @@ public class SpreadsheetViewModel {
         // Mettre à jour la barre d'édition quand la cellule sélectionnée change
         selectedCell.addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                Cell cell = model.getCell(newVal[0], newVal[1]);
+                Cell cell = this.model.getCell(newVal[0], newVal[1]);
                 if (cell != null) {
                     editBarContent.set(cell.getContent());
                 } else {
@@ -63,22 +63,29 @@ public class SpreadsheetViewModel {
     public SpreadsheetModel getModel() {
         return model;
     }
+
+    public void setModel(SpreadsheetModel model) {
+        this.model = model;
+    }
     public void loadFromFile(String filepath) throws IOException, IllegalArgumentException {
-        SpreadsheetModel newModel = SpreadsheetFileHandler.loadSpreadsheet(filepath);
+        setModel(SpreadsheetFileHandler.loadSpreadsheet(filepath));
 
         // Check dimensions
-        if (newModel.getRowCount() != model.getRowCount() || newModel.getColumnCount() != model.getColumnCount()) {
-            throw new IllegalArgumentException("Loaded file dimensions do not match current spreadsheet.");
-        }
+//        if (newModel.getRowCount() != model.getRowCount() || newModel.getColumnCount() != model.getColumnCount()) {
+//            throw new IllegalArgumentException("Loaded file dimensions do not match current spreadsheet.");
+//        }
 
         // Copy cell contents
-        for (int row = 0; row < model.getRowCount(); row++) {
-            for (int col = 0; col < model.getColumnCount(); col++) {
-                Cell newCell = newModel.getCell(row, col);
-                Cell currentCell = model.getCell(row, col);
-                currentCell.setContent(newCell.getContent());
-            }
-        }
+//        for (int row = 0; row < model.getRowCount(); row++) {
+//            for (int col = 0; col < model.getColumnCount(); col++) {
+//                Cell newCell = newModel.getCell(row, col);
+//                Cell currentCell = model.getCell(row, col);
+//                currentCell.setContent(newCell.getContent());
+//            }
+//        }
+        this.selectedCell.set(null); // Reset selected cell
+        this.editBarContent.set(""); // Clear edit bar
+
         undoStack.clear();
         redoStack.clear();
         updateUndoRedoState();
@@ -229,7 +236,6 @@ public class SpreadsheetViewModel {
                 SpreadsheetFileHandler.saveSpreadsheet(this.getModel(), file.getAbsolutePath());
             } catch (IOException e) {
                 throw new IOException();
-
             }
         }
     }
@@ -246,6 +252,8 @@ public class SpreadsheetViewModel {
 
             }
         }
-
+    }
+    public IntegerProperty sumAndPow() {
+        return model.sumCountAndPowInSpreadheetProperty();
     }
 }

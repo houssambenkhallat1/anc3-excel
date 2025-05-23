@@ -17,19 +17,30 @@ import java.io.IOException;
 
 public class MainView extends BorderPane {
 
+    private MySpreadsheetView spreadsheetView;
+    private MenuBar menuBar;
+    private HeaderView headerView;
+
     public MainView(SpreadsheetViewModel viewModel, Stage stage) {
         // Create the menu bar
-        MenuBar menuBar = createMenuBar(viewModel, stage);
+        menuBar = createMenuBar(viewModel, stage);
+        reloadSpreadsheetView(viewModel);
+
+    }
+
+    private void reloadSpreadsheetView(SpreadsheetViewModel viewModel) {
+        // Spreadsheet view
+        this.spreadsheetView = new MySpreadsheetView(viewModel); // Initialize here
+        this.setCenter(spreadsheetView);
+
+        this.spreadsheetView.updateGride();
 
         // Header with cell editor
-        HeaderView headerView = new HeaderView(viewModel);
+        this.headerView = new HeaderView(viewModel);
 
         // Combine menu bar and header in a VBox
         VBox topContainer = new VBox(menuBar, headerView);
         this.setTop(topContainer);
-
-        // Spreadsheet view
-        this.setCenter(new MySpreadsheetView(viewModel));
 
         //pour garantir que le panneau reçoit les événements clavier
         this.setFocusTraversable(true);
@@ -39,6 +50,8 @@ public class MainView extends BorderPane {
         this.setBottom(footerLabel);
 
     }
+
+
 
     private MenuBar createMenuBar(SpreadsheetViewModel viewModel, Stage stage) {
         MenuBar menuBar = new MenuBar();
@@ -84,6 +97,7 @@ public class MainView extends BorderPane {
                 } else if (event.getCode() == KeyCode.N) {
                     try {
                         viewModel.handleOpen(stage);
+                        reloadSpreadsheetView(viewModel);
                     } catch (IOException e) {
                         showErrorDialog("Load Error", "Could not load file: " + e.getMessage(), stage);
                     }
@@ -112,6 +126,7 @@ public class MainView extends BorderPane {
         openItem.setOnAction(event -> {
             try {
                 viewModel.handleOpen(stage);
+                reloadSpreadsheetView(viewModel);
             } catch (IOException e) {
                 showErrorDialog("Load Error", "Could not load file: " + e.getMessage(), stage);
             }

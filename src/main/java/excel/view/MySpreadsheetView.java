@@ -57,6 +57,28 @@ public class MySpreadsheetView extends SpreadsheetView {
 
         layoutSpreadSheet();
     }
+
+    public void updateGride(){
+        GridBase grid = createGridAndBindings();
+
+        this.setGrid(grid);
+        for (int row = 0; row < grid.getRowCount(); row++) {
+            ObservableList<SpreadsheetCell> rowCells = grid.getRows().get(row);
+
+            // Parcourir toutes les cellules de la ligne
+            for (int column = 0; column < rowCells.size(); column++) {
+                SpreadsheetCell cell = rowCells.get(column);
+                String currentValue = viewModel.getCellValueProperty(row, column).getValue();
+
+                // Rafraîchir l'affichage de la cellule si nécessaire
+                if (!Objects.equals(cell.getItem(), currentValue)) {
+                    updatingCellFromViewModel = true;
+                    cell.setItem(currentValue);
+                    updatingCellFromViewModel = false;
+                }
+            }
+        }
+    }
     private void layoutSpreadSheet() {
         for (int column = 0; column < grid.getColumnCount(); column++) {
             this.getColumns().get(column).setPrefWidth(CELL_PREF_WIDTH);

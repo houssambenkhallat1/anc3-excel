@@ -1,5 +1,8 @@
 package excel.model;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+
 import java.util.*;
 
 /**
@@ -10,6 +13,21 @@ public class SpreadsheetModel {
     private final int columnCount;
     private final Cell[][] cells;
     private final ExpressionBuilder expressionBuilder;
+
+    private IntegerProperty sumCountAndPowInSpreadheet = new SimpleIntegerProperty(0);
+
+    public int getSumCountAndPowInSpreadheet() {
+        return sumCountAndPowInSpreadheet.get();
+    }
+
+    public IntegerProperty sumCountAndPowInSpreadheetProperty() {
+        return sumCountAndPowInSpreadheet;
+    }
+
+    public void setSumCountAndPowInSpreadheet(int sumCountAndPowInSpreadheet) {
+        this.sumCountAndPowInSpreadheet.set(sumCountAndPowInSpreadheet);
+    }
+
     private final Map<Cell, List<Cell>> dependencies = new HashMap<>();
 
     public SpreadsheetModel(int rowCount, int columnCount) {

@@ -1,10 +1,7 @@
 package excel.model;
 
 import excel.tools.ExcelConverter;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 
 public class Cell {
@@ -16,6 +13,20 @@ public class Cell {
     private Expression expression;
     private boolean evaluating = false; // Pour détecter les références circulaires
     private final SpreadsheetModel spreadsheet;
+
+    private IntegerProperty sumCountAndPowInCellModel = new SimpleIntegerProperty(0);
+
+    public int getSumCountAndPowInCellModel() {
+        return sumCountAndPowInCellModel.get();
+    }
+
+    public IntegerProperty sumCountAndPowInCellModelProperty() {
+        return sumCountAndPowInCellModel;
+    }
+
+    public void setSumCountAndPowInCellModel(int sumCountAndPowInCellModel) {
+        this.sumCountAndPowInCellModel.set(sumCountAndPowInCellModel);
+    }
 
     public Cell(int row, int column, SpreadsheetModel spreadsheet) {
         this.row = row;
@@ -36,6 +47,12 @@ public class Cell {
             } else {
                 displayValue.set("");
             }
+        });
+
+        sumCountAndPowInCellModel.addListener((obs, oldVal, newVal) -> {
+
+            spreadsheet.setSumCountAndPowInSpreadheet(newVal.intValue() - oldVal.intValue());
+
         });
     }
 
@@ -181,6 +198,10 @@ public class Cell {
     @Override
     public String toString() {
         return "Cell[" + getAddress() + ", content=" + getContent() + ", value=" + getValue() + "]";
+    }
+
+    public void setCounterSumAndPowInCell(int sumCountAndPowInCell) {
+        setSumCountAndPowInCellModel(sumCountAndPowInCell);
     }
 
 }
