@@ -9,20 +9,16 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class HeaderView extends VBox {
-    private final SpreadsheetViewModel viewModel;
-    private final TextField cellContentEditor;
-    private final Label cellAddressLabel;
 
     public HeaderView(SpreadsheetViewModel viewModel) {
-        this.viewModel = viewModel;
         this.setPadding(new Insets(10));
         this.setSpacing(10);
 
         // Créer un label pour afficher l'adresse de la cellule sélectionnée
-        cellAddressLabel = new Label("Cellule: ");
+        Label cellAddressLabel = new Label("Cellule: ");
 
         // Créer un champ de texte pour éditer le contenu de la cellule
-        cellContentEditor = new TextField();
+        TextField cellContentEditor = new TextField();
         cellContentEditor.setPrefWidth(400);
 
         // Lier le contenu de l'éditeur à la propriété du ViewModel

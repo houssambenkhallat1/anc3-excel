@@ -1,19 +1,33 @@
 package excel.viewmodel;
 
 import excel.model.Cell;
+import excel.model.SpreadsheetFileHandler;
+import java.io.File;
+import java.io.IOException;
 import excel.tools.ExcelConverter;
 import excel.model.SpreadsheetModel;
 import javafx.beans.property.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 /**
  * ViewModel pour le tableur
  */
 public class SpreadsheetViewModel {
-    private final SpreadsheetModel model;
+    private final Deque<Command> undoStack = new ArrayDeque<>();
+    private final Deque<Command> redoStack = new ArrayDeque<>();
+    private final BooleanProperty canUndo = new SimpleBooleanProperty(false);
+    private final BooleanProperty canRedo = new SimpleBooleanProperty(false);
+
+    private SpreadsheetModel model;
     private final StringProperty editBarContent = new SimpleStringProperty("");
     private final ObjectProperty<int[]> selectedCell = new SimpleObjectProperty<>();
     private final SimpleBooleanProperty editableProperty = new SimpleBooleanProperty(true);
@@ -28,7 +42,7 @@ public class SpreadsheetViewModel {
         // Mettre à jour la barre d'édition quand la cellule sélectionnée change
         selectedCell.addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                Cell cell = model.getCell(newVal[0], newVal[1]);
+                Cell cell = this.model.getCell(newVal[0], newVal[1]);
                 if (cell != null) {
                     editBarContent.set(cell.getContent());
                 } else {
@@ -46,7 +60,36 @@ public class SpreadsheetViewModel {
             }
         });
     }
+    public SpreadsheetModel getModel() {
+        return model;
+    }
 
+    public void setModel(SpreadsheetModel model) {
+        this.model = model;
+    }
+    public void loadFromFile(String filepath) throws IOException, IllegalArgumentException {
+        setModel(SpreadsheetFileHandler.loadSpreadsheet(filepath));
+
+        // Check dimensions
+//        if (newModel.getRowCount() != model.getRowCount() || newModel.getColumnCount() != model.getColumnCount()) {
+//            throw new IllegalArgumentException("Loaded file dimensions do not match current spreadsheet.");
+//        }
+
+        // Copy cell contents
+//        for (int row = 0; row < model.getRowCount(); row++) {
+//            for (int col = 0; col < model.getColumnCount(); col++) {
+//                Cell newCell = newModel.getCell(row, col);
+//                Cell currentCell = model.getCell(row, col);
+//                currentCell.setContent(newCell.getContent());
+//            }
+//        }
+        this.selectedCell.set(null); // Reset selected cell
+        this.editBarContent.set(""); // Clear edit bar
+
+        undoStack.clear();
+        redoStack.clear();
+        updateUndoRedoState();
+    }
     public int getRowCount() {
         return model.getRowCount();
     }
@@ -93,7 +136,21 @@ public class SpreadsheetViewModel {
      */
     public void setEditingCell(int row, int column) {
         addAction("Editing cell at " + row + "," + column);
-        // Cette méthode peut être utilisée pour suivre l'état d'édition
+        Cell cell = model.getCell(row, column);
+        if (cell != null) {
+            cell.displayValueProperty().set(cell.getContent());
+        }
+    }
+
+    /**
+     * Indique qu'une cellule n'est plus en mode édition
+     */
+
+    public void setNotEditingCell(int row, int column) {
+        Cell cell = model.getCell(row, column);
+        if (cell != null) {
+            updateCellContent(row,column, cell.getContent());
+        }
     }
 
     /**
@@ -103,8 +160,47 @@ public class SpreadsheetViewModel {
         addAction("Update cell content at " + row + "," + column + ": " + content);
         Cell cell = model.getCell(row, column);
         if (cell != null) {
-            cell.setContent(content);
+            String oldContent = cell.getContent();
+            Command command = new CellChangeCommand(model, row, column, oldContent, content);
+            executeCommand(command);
         }
+    }
+    private void executeCommand(Command command) {
+        undoStack.push(command);
+        command.execute();
+        redoStack.clear();
+        updateUndoRedoState();
+    }
+
+    public void undo() {
+        if (!undoStack.isEmpty()) {
+            Command command = undoStack.pop();
+            command.undo();
+            redoStack.push(command);
+            updateUndoRedoState();
+        }
+    }
+
+    public void redo() {
+        if (!redoStack.isEmpty()) {
+            Command command = redoStack.pop();
+            command.execute();
+            undoStack.push(command);
+            updateUndoRedoState();
+        }
+    }
+
+    private void updateUndoRedoState() {
+        canUndo.set(!undoStack.isEmpty());
+        canRedo.set(!redoStack.isEmpty());
+    }
+
+    public BooleanProperty canUndoProperty() {
+        return canUndo;
+    }
+
+    public BooleanProperty canRedoProperty() {
+        return canRedo;
     }
 
     /**
@@ -118,7 +214,6 @@ public class SpreadsheetViewModel {
         }
     }
 
-
     /**
      * Ajoute une action au journal
      */
@@ -126,5 +221,43 @@ public class SpreadsheetViewModel {
         return actions.add(action);
     }
 
+    public void handleSave(Stage stage) throws IOException{
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Spreadsheet");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files (*.e4e)", "*.e4e"));
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            try {
+                // Ensure .e4e extension
+                String path = file.getAbsolutePath();
+                if (!path.endsWith(".e4e")) {
+                    file = new File(path + ".e4e");
+                }
+                SpreadsheetFileHandler.saveSpreadsheet(this.getModel(), file.getAbsolutePath());
+            } catch (IOException e) {
+                throw new IOException();
+            }
+        }
+    }
+    public void handleOpen(Stage stage) throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Spreadsheet");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files (*.e4e)", "*.e4e"));
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                this.loadFromFile(file.getAbsolutePath());
+            } catch (IOException | IllegalArgumentException e) {
+                throw new IOException();
 
+            }
+        }
+    }
+    public IntegerProperty sumAndPow() {
+        return this.model.sumCountAndPowInSpreadheetProperty();
+    }
+
+    public int updateSumAndPower() {
+        return this.model.sumCountAndPowInSpreadheetProperty().get();
+    }
 }

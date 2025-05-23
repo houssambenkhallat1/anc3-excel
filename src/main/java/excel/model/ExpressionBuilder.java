@@ -1,5 +1,7 @@
 package excel.model;
 
+import javafx.beans.property.SimpleIntegerProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -13,6 +15,22 @@ public class ExpressionBuilder {
 
     private final SpreadsheetModel spreadsheet;
 
+    private SimpleIntegerProperty sumCountInBuilder = new SimpleIntegerProperty(0);
+
+    public int getSumCountInBuilder() {
+        return sumCountInBuilder.get();
+    }
+
+    public SimpleIntegerProperty sumCountInBuilderProperty() {
+        return sumCountInBuilder;
+    }
+
+    public void setSumCountInBuilder(int sumCountInBuilder) {
+        this.sumCountInBuilder.set(sumCountInBuilder);
+    }
+
+    int counterSum = 0;
+
     // Constructeur avec référence au modèle
     public ExpressionBuilder(SpreadsheetModel spreadsheet) {
         this.spreadsheet = spreadsheet;
@@ -20,7 +38,7 @@ public class ExpressionBuilder {
 
     // Tokens pour l'analyse lexicale
     private enum TokenType {
-        NUMBER, BOOLEAN, TEXT, CELL_REFERENCE, OPERATOR, LOGICAL_OPERATOR, COMPARISON_OPERATOR, WHITESPACE
+        NUMBER, BOOLEAN, TEXT, CELL_REFERENCE, OPERATOR, LOGICAL_OPERATOR, COMPARISON_OPERATOR, FUNCTION, PARENTHESIS
     }
 
     private static class Token {
@@ -37,6 +55,11 @@ public class ExpressionBuilder {
      * Construit une expression à partir d'une chaîne et de la cellule source
      */
     public Expression build(String content, Cell sourceCell) {
+        this.sumCountInBuilder.addListener((observable, oldValue, newValue) -> {
+            if (newValue.intValue() != oldValue.intValue()) {
+                sourceCell.setCounterSumAndPowInCell(getSumCountInBuilder());
+            }
+        });
         if (content == null || content.isEmpty()) {
             return new LiteralExpression(CellValue.ofText(""));
         }
@@ -44,10 +67,17 @@ public class ExpressionBuilder {
         try {
             // Analyse lexicale
             List<Token> tokens = tokenize(content);
-
+            sourceCell.setCounterSumAndPowInCell(counterSum);
+            counterSum = 0;
             // Analyse syntaxique et construction de l'expression
+
             return parseExpression(tokens, sourceCell);
-        } catch (Exception e) {
+        } catch (CircularReferenceException e) {
+            counterSum = 0;
+            return new LiteralExpression(CellValue.ofError(CellError.CIRCULAR_REF));
+
+        } catch ( Exception e){
+            counterSum = 0;
             return new LiteralExpression(CellValue.ofError(CellError.SYNTAX_ERROR));
         }
     }
@@ -77,8 +107,24 @@ public class ExpressionBuilder {
                 continue;
             }
 
+            //PARENTHESIS
+            if(c == '(' || c == ')' || c == ':'){
+                if (currentType != null) {
+                    tokens.add(new Token(currentType, currentToken.toString()));
+                    currentToken.setLength(0);
+                }
+                tokens.add(new Token(TokenType.PARENTHESIS, String.valueOf(c)));
+                currentToken.setLength(0);
+                currentType = null;
+                continue;
+            }
+
             // Opérateur
-            if (c == '+' || c == '-' || c == '*' || c == '/') {
+            if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^') {
+
+                if (c == '^') {
+                    ++counterSum;
+                }
                 if (currentType != null) {
                     tokens.add(new Token(currentType, currentToken.toString()));
                     currentToken.setLength(0);
@@ -163,7 +209,12 @@ public class ExpressionBuilder {
                 } else if (token.value.equalsIgnoreCase("true") ||
                         token.value.equalsIgnoreCase("false")) {
                     processedTokens.add(new Token(TokenType.BOOLEAN, token.value.toLowerCase()));
-                } else {
+                }else if (token.value.equalsIgnoreCase("sum" ) || token.value.equalsIgnoreCase("avg")
+                        || token.value.equalsIgnoreCase("min") || token.value.equalsIgnoreCase("max")) {
+                    processedTokens.add(new Token(TokenType.FUNCTION, token.value.toLowerCase()));
+                    ++counterSum;
+                }
+                else {
                     processedTokens.add(new Token(TokenType.TEXT, token.value));
                 }
             } else {
@@ -178,7 +229,6 @@ public class ExpressionBuilder {
         if (tokens.isEmpty()) {
             throw new IllegalArgumentException("Expression vide");
         }
-
         return parseLogicalOr(tokens, 0, sourceCell).expression;
     }
 
@@ -306,11 +356,21 @@ public class ExpressionBuilder {
         int i = left.nextTokenIndex;
         while (i < tokens.size() &&
                 tokens.get(i).type == TokenType.OPERATOR &&
-                (tokens.get(i).value.equals("*") || tokens.get(i).value.equals("/"))) {
+                (tokens.get(i).value.equals("^") || tokens.get(i).value.equals("*") || tokens.get(i).value.equals("/"))) {
 
-            BinaryArithmeticExpression.Operator operator = tokens.get(i).value.equals("*") ?
-                    BinaryArithmeticExpression.Operator.MULTIPLY :
-                    BinaryArithmeticExpression.Operator.DIVIDE;
+//            BinaryArithmeticExpression.Operator operator = tokens.get(i).value.equals("^") ?
+//                    BinaryArithmeticExpression.Operator.POWER : tokens.get(i).value.equals("*") ?
+//                    BinaryArithmeticExpression.Operator.MULTIPLY : BinaryArithmeticExpression.Operator.DIVIDE;
+
+            BinaryArithmeticExpression.Operator operator;
+
+            if (tokens.get(i).value.equals("^")) {
+                operator = BinaryArithmeticExpression.Operator.POWER;
+            } else if (tokens.get(i).value.equals("*")) {
+                operator = BinaryArithmeticExpression.Operator.MULTIPLY;
+            } else {
+                operator = BinaryArithmeticExpression.Operator.DIVIDE;
+            }
 
             ParseResult right = parsePrimary(tokens, i + 1, sourceCell);
             left = new ParseResult(
@@ -319,7 +379,6 @@ public class ExpressionBuilder {
             );
             i = left.nextTokenIndex;
         }
-
         return left;
     }
 
@@ -332,6 +391,10 @@ public class ExpressionBuilder {
         Token token = tokens.get(startIndex);
 
         switch (token.type) {
+            case FUNCTION:
+                return new ParseResult(
+                        new FunctionExpression(tokens.get(startIndex).value, tokens.get(startIndex+2).value,tokens.get(startIndex+4).value,sourceCell),startIndex + 6);
+
             case NUMBER:
                 double number = Double.parseDouble(token.value.replace(',', '.'));
                 return new ParseResult(

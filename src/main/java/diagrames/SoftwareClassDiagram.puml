@@ -1,0 +1,200 @@
+@startuml
+
+'!theme plain
+skinparam defaultFontName Consolas
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam nodesep 150
+skinparam ranksep 100
+skinparam class {
+    BackgroundColor White
+    ArrowColor #444444
+    BorderColor #444444
+}
+
+rectangle  {
+
+    package org.controlsfx {
+        class SpreadsheetView {
+            + commitEdit()
+            + editCell(row: int, column: int)
+        }
+    }
+
+    package javafx {
+        class Application {
+            + start(primaryStage: Stage)
+        }
+
+        class BorderPane
+        class HBox
+    }
+
+    package excel.model {
+        interface Expression {
+            + evaluate(): CellValue
+        }
+
+        class SpreadsheetModel {
+            - rowCount: int
+            - columnCount: int
+            - cells: Cell[][]
+            - dependencies: Map<Cell, List<Cell>>
+            + getCell(row: int, column: int): Cell
+            + addDependency(dependent: Cell, source: Cell)
+            + notifyCellChanged(cell: Cell)
+        }
+
+        class Cell {
+            - row: int
+            - column: int
+            - content: StringProperty
+            - value: ObjectProperty<CellValue>
+            - displayValue: StringProperty
+            - expression: Expression
+            - evaluating: boolean
+            + updateValue()
+            + recalculate()
+            - parseContent(content: String): CellValue
+        }
+
+        class CellValue {
+            <<enumeration>>
+            - Type: TEXT, NUMBER, BOOLEAN, ERROR
+            + format(): String
+        }
+
+        class ExpressionBuilder {
+            - spreadsheet: SpreadsheetModel
+            + build(content: String, source: Cell): Expression
+            - tokenize(expression: String): List<Token>
+            - parseExpression(tokens: List<Token>, source: Cell): Expression
+        }
+
+        class BinaryArithmeticExpression {
+            - left: Expression
+            - right: Expression
+            - operator: Operator
+        }
+
+        class ComparisonExpression {
+            - left: Expression
+            - right: Expression
+            - operator: Operator
+        }
+
+        class LogicalExpression {
+            - left: Expression
+            - right: Expression
+            - operator: Operator
+        }
+
+        class ReferenceExpression {
+            - cellReference: String
+            - sourceCell: Cell
+        }
+
+        class LiteralExpression {
+            - value: CellValue
+        }
+
+        class FunctionExpression {
+            - rangeStart: String
+            - rangeEnd: String
+            - cellSource: Cell
+        }
+
+        Expression <|.. BinaryArithmeticExpression
+        Expression <|.. ComparisonExpression
+        Expression <|.. LogicalExpression
+        Expression <|.. ReferenceExpression
+        Expression <|.. LiteralExpression
+        Expression <|.. FunctionExpression
+
+        SpreadsheetModel *--> "0..*" Cell
+        SpreadsheetModel --> ExpressionBuilder
+        Cell --> CellValue
+        Cell --> Expression
+        ExpressionBuilder --> SpreadsheetModel
+    }
+
+    package excel.view {
+        class MainView {
+            - viewModel: SpreadsheetViewModel
+            - stage: Stage
+            + createMenuBar(): MenuBar
+        }
+
+        class MySpreadsheetView {
+            - viewModel: SpreadsheetViewModel
+            - grid: GridBase
+            - updatingCellFromViewModel: boolean
+        }
+
+        class HeaderView {
+            - viewModel: SpreadsheetViewModel
+            - cellContentEditor: TextField
+            - cellAddressLabel: Label
+        }
+
+        BorderPane <|-- MainView
+        SpreadsheetView <|-- MySpreadsheetView
+    }
+
+    package excel.viewmodel {
+        class SpreadsheetViewModel {
+            - model: SpreadsheetModel
+            - undoStack: Deque<Command>
+            - redoStack: Deque<Command>
+            - canUndo: BooleanProperty
+            - canRedo: BooleanProperty
+            - editBarContent: StringProperty
+            - selectedCell: ObjectProperty<int[]>
+            + updateCellContent(row: int, column: int, content: String)
+            + commitEdit()
+        }
+
+        class CellChangeCommand {
+            - model: SpreadsheetModel
+            - row: int
+            - col: int
+            - oldContent: String
+            - newContent: String
+            + execute()
+            + undo()
+        }
+
+        interface Command {
+            + execute()
+            + undo()
+        }
+
+        Command <|.. CellChangeCommand
+        SpreadsheetViewModel --> "0..*" Command
+    }
+
+    package excel.tools {
+        class ExcelConverter {
+            + rowColToExcel(row: int, col: int): String
+            + excelToRowCol(reference: String): int[]
+        }
+    }
+
+    class App {
+        - ROWS: int = 10 {static}
+        - COLUMNS: int = 4 {static}
+        + start(primaryStage: Stage)
+        + main(args: String[])
+    }
+
+    App -|> javafx.Application
+    App --> excel.model.SpreadsheetModel
+    App --> excel.viewmodel.SpreadsheetViewModel
+    App --> excel.view.MainView
+    SpreadsheetViewModel --> excel.model.SpreadsheetModel
+    excel.view.MainView --> excel.viewmodel.SpreadsheetViewModel
+    excel.view.MySpreadsheetView --> excel.viewmodel.SpreadsheetViewModel
+    excel.view.HeaderView --> excel.viewmodel.SpreadsheetViewModel
+}
+
+@enduml
