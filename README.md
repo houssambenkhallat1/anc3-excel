@@ -1,44 +1,109 @@
-# Projet ANC3 2425 - Groupe g04 - Excel
+📝 Project Description
+This project implements a mini spreadsheet offering features similar to Excel, Google Sheets, or OpenCalc. The application allows manipulation of cells with literal values (numbers, booleans, text) or calculated expressions.
+✨ Key Features
 
-## Notes de version itération 1
+Cell editing with double-click or editing bar
+Complex expressions with arithmetic, logical, and comparison operators
+Cell references (e.g., =A1+B2)
+Error handling: SYNTAX ERROR, #VALUE, #CIRCULAR REF
+Automatic number formatting (e.g., 5.0 → 5, 5.35 → 5.35)
+SUM function (e.g., =SUM(A1:A5))
+Undo/Redo operations (Ctrl+Z / Ctrl+Y)
+Save/Load spreadsheet files
 
-### Liste des bugs connus
+🧠 Architecture and Design Patterns
+Implemented Design Patterns
 
-* (RESOLU) L'expression = B2 + 3 * 5 + C4 déclenche une erreur "SYNTAX ERROR"  au lieu de "VALEUR" si par exemple la valeur de B2 ou de C4 ne sont pas numériques
-* (RESOLU) Pour les références circulaires, la source affiche bien #CIRCULAR REF. mais l'autre cellule affiche SYNTAX ERROR.
-* (RESOLU) Les cellules références affichent l'expression mais dès que plusieurs modifications y sont faites, elles  affichent la valeur au lieu de l'expression. Donc cela ne fonction qu'en partie.
+Interpreter:
 
-### Liste des fonctionnalités supplémentaires
-
-### Divers
-
-## Notes de version itération 2
-
-...
-
-## Notes de version itération 3
-
-ajout des fonctions exposant, min, max et avg + footer label
-ajout également de la modification de la taille du tableau (taille du tableau adaptable pour les tests)
+Expression representation as syntax trees
+Recursive expression evaluation
 
 
-## Pour lancer le projet
+Builder:
 
-### Option 1 
+Construction of Expression objects from strings
+Syntax parsing and expression validation
 
-Dans le menu d'exécution, ne pas choisir "Current File" mais "App"
 
-### Option 2
+Command:
 
-Dans VM options, ajouter ça : 
+Undo/Redo command management
+Modification history tracking
 
-```
---add-exports=javafx.base/com.sun.javafx.event=org.controlsfx.controls
---add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=org.controlsfx.controls
-```
 
-Source : https://github.com/controlsfx/controlsfx/wiki/Using-ControlsFX-with-JDK-9-and-above 
+MVVM (Model-View-ViewModel):
 
-### Option 3
+Clear separation of concerns
+Reactive user interface
 
-Dans la console de maven, tapper `mvn javafx:run`
+
+
+🚀 How to Run the Project
+Prerequisites
+
+Java 17 or higher
+Maven 3.6+
+
+Installation
+bashgit clone https://github.com/your-username/mini-spreadsheet.git
+cd mini-spreadsheet
+mvn clean javafx:run
+Keyboard Shortcuts
+
+Ctrl+Z: Undo last action
+Ctrl+Y: Redo undone action
+Ctrl+S: Save spreadsheet
+Ctrl+O: Open spreadsheet
+
+🧪 Technical Features
+Supported Data Types
+TypeExamplesNumber42, 3.14, -5.5Booleantrue, FALSE, TrueText"Hello", 'World'Expression=A1+B2, =5>3
+Supported Operators
+CategoryOperatorsPriorityMultiplicative*, /1 (highest)Additive+, -2Comparison>, >=, <, <=, =, !=3Logicalnot4and5or6 (lowest)
+Expression Examples
+
+Arithmetic: =5+3*2 → 11
+Logic: =5>3 and not 2>4 or true → true
+Reference: =B2+3*5+C4
+Function: =SUM(A1:A5)
+
+📁 File Structure
+mini-spreadsheet/
+├── src/
+│   ├── main/
+│   │   ├── java/excel/
+│   │   │   ├── model/        # Data model
+│   │   │   ├── view/         # User interface
+│   │   │   ├── viewmodel/    # ViewModel (MVVM)
+│   │   │   └── App.java      # Entry point
+│   │   └── resources/        # CSS files and resources
+│   └── test/                 # Unit tests
+├── pom.xml                   # Maven configuration
+└── README.md                 # This file
+🛠 Development
+Implemented Features
+
+ Expression syntax parsing
+ Expression evaluation
+ Cell reference management
+ Circular reference detection
+ Automatic number formatting
+ SUM function
+ Undo/Redo system
+ File save/load functionality
+
+Possible Improvements
+
+ Additional functions (AVERAGE, MAX, MIN, etc.)
+ Array formula support
+ Syntax highlighting in editing bar
+ Multiple sheet management
+ CSV and Excel import/export
+ Charts and visualizations
+ Conditional cell formatting
+
+
+
+📜 License
+This project is developed as part of the Development Project course at EPFC.
