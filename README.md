@@ -1,74 +1,97 @@
-📝 Project Description
+# 📊 Mini Spreadsheet
+
+A modern spreadsheet application implemented in Java with JavaFX, offering features similar to Excel, Google Sheets, or OpenCalc.
+
+
+## 📝 Project Description
+
 This project implements a mini spreadsheet offering features similar to Excel, Google Sheets, or OpenCalc. The application allows manipulation of cells with literal values (numbers, booleans, text) or calculated expressions.
-✨ Key Features
 
-Cell editing with double-click or editing bar
-Complex expressions with arithmetic, logical, and comparison operators
-Cell references (e.g., =A1+B2)
-Error handling: SYNTAX ERROR, #VALUE, #CIRCULAR REF
-Automatic number formatting (e.g., 5.0 → 5, 5.35 → 5.35)
-SUM function (e.g., =SUM(A1:A5))
-Undo/Redo operations (Ctrl+Z / Ctrl+Y)
-Save/Load spreadsheet files
+## ✨ Key Features
 
-🧠 Architecture and Design Patterns
-Implemented Design Patterns
+* **Cell editing** with double-click or editing bar
+* **Complex expressions** with arithmetic, logical, and comparison operators
+* **Cell references** (e.g., `=A1+B2`)
+* **Error handling**: SYNTAX ERROR, #VALUE, #CIRCULAR REF
+* **Automatic number formatting** (e.g., 5.0 → 5, 5.35 → 5.35)
+* **SUM function** (e.g., `=SUM(A1:A5)`)
+* **Undo/Redo** operations (Ctrl+Z / Ctrl+Y)
+* **Save/Load** spreadsheet files
 
-Interpreter:
+## 🧠 Architecture and Design Patterns
 
-Expression representation as syntax trees
-Recursive expression evaluation
+### Implemented Design Patterns
 
+1. **Interpreter**:
+   * Expression representation as syntax trees
+   * Recursive expression evaluation
 
-Builder:
+2. **Builder**:
+   * Construction of `Expression` objects from strings
+   * Syntax parsing and expression validation
 
-Construction of Expression objects from strings
-Syntax parsing and expression validation
+3. **Command**:
+   * Undo/Redo command management
+   * Modification history tracking
 
+4. **MVVM (Model-View-ViewModel)**:
+   * Clear separation of concerns
+   * Reactive user interface
 
-Command:
+## 🚀 How to Run the Project
 
-Undo/Redo command management
-Modification history tracking
+### Prerequisites
 
+* Java 17 or higher
+* Maven 3.6+
 
-MVVM (Model-View-ViewModel):
+### Installation
 
-Clear separation of concerns
-Reactive user interface
-
-
-
-🚀 How to Run the Project
-Prerequisites
-
-Java 17 or higher
-Maven 3.6+
-
-Installation
-bashgit clone https://github.com/your-username/mini-spreadsheet.git
-cd mini-spreadsheet
+```bash
+git clone https://github.com/houssambenkhallat1/anc3-excel.git
+cd anc3-excel
 mvn clean javafx:run
-Keyboard Shortcuts
+```
 
-Ctrl+Z: Undo last action
-Ctrl+Y: Redo undone action
-Ctrl+S: Save spreadsheet
-Ctrl+O: Open spreadsheet
+### Keyboard Shortcuts
 
-🧪 Technical Features
-Supported Data Types
-TypeExamplesNumber42, 3.14, -5.5Booleantrue, FALSE, TrueText"Hello", 'World'Expression=A1+B2, =5>3
-Supported Operators
-CategoryOperatorsPriorityMultiplicative*, /1 (highest)Additive+, -2Comparison>, >=, <, <=, =, !=3Logicalnot4and5or6 (lowest)
-Expression Examples
+* **Ctrl+Z**: Undo last action
+* **Ctrl+Y**: Redo undone action
+* **Ctrl+S**: Save spreadsheet
+* **Ctrl+O**: Open spreadsheet
 
-Arithmetic: =5+3*2 → 11
-Logic: =5>3 and not 2>4 or true → true
-Reference: =B2+3*5+C4
-Function: =SUM(A1:A5)
+## 🧪 Technical Features
 
-📁 File Structure
+### Supported Data Types
+
+| Type | Examples |
+|------|----------|
+| Number | `42`, `3.14`, `-5.5` |
+| Boolean | `true`, `FALSE`, `True` |
+| Text | `"Hello"`, `'World'` |
+| Expression | `=A1+B2`, `=5>3` |
+
+### Supported Operators
+
+| Category | Operators | Priority |
+|----------|-----------|----------|
+| Multiplicative | `*`, `/` | 1 (highest) |
+| Additive | `+`, `-` | 2 |
+| Comparison | `>`, `>=`, `<`, `<=`, `=`, `!=` | 3 |
+| Logical | `not` | 4 |
+| | `and` | 5 |
+| | `or` | 6 (lowest) |
+
+### Expression Examples
+
+1. **Arithmetic**: `=5+3*2` → 11
+2. **Logic**: `=5>3 and not 2>4 or true` → true
+3. **Reference**: `=B2+3*5+C4`
+4. **Function**: `=SUM(A1:A5)`
+
+## 📁 File Structure
+
+```
 mini-spreadsheet/
 ├── src/
 │   ├── main/
@@ -81,29 +104,35 @@ mini-spreadsheet/
 │   └── test/                 # Unit tests
 ├── pom.xml                   # Maven configuration
 └── README.md                 # This file
-🛠 Development
-Implemented Features
+```
 
- Expression syntax parsing
- Expression evaluation
- Cell reference management
- Circular reference detection
- Automatic number formatting
- SUM function
- Undo/Redo system
- File save/load functionality
+## 🛠 Development
 
-Possible Improvements
+### Implemented Features
 
- Additional functions (AVERAGE, MAX, MIN, etc.)
- Array formula support
- Syntax highlighting in editing bar
- Multiple sheet management
- CSV and Excel import/export
- Charts and visualizations
- Conditional cell formatting
+- [x] Expression syntax parsing
+- [x] Expression evaluation
+- [x] Cell reference management
+- [x] Circular reference detection
+- [x] Automatic number formatting
+- [x] SUM function
+- [x] Undo/Redo system
+- [x] File save/load functionality
+
+### Possible Improvements
+
+- [ ] Additional functions (AVERAGE, MAX, MIN, etc.)
+- [ ] Array formula support
+- [ ] Syntax highlighting in editing bar
+- [ ] Multiple sheet management
+- [ ] CSV and Excel import/export
+- [ ] Charts and visualizations
+- [ ] Conditional cell formatting
 
 
 
-📜 License
+## 📜 License
+
 This project is developed as part of the Development Project course at EPFC.
+
+
